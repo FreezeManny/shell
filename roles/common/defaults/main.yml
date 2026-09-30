@@ -1,0 +1,32 @@
+---
+target_user: "{{ ansible_user | default(lookup('env', 'SUDO_USER'), true) | default(lookup('env', 'USER'), true) }}"
+user_home: "/home/{{ target_user }}"
+
+supported_os_families:
+  - Debian
+  - RedHat
+
+packages:
+  common:
+    - zsh
+    - tmux
+    - fzf
+    - bat
+    - tig
+    - neovim
+    - git
+    - curl
+    - wget
+    - unzip
+    - fontconfig
+    - cmake
+    - rsync
+    - ncurses-term
+  Debian:
+    - g++
+    - locales
+  RedHat:
+    - gcc-c++
+    # language Packages
+    - glibc-langpack-en
+    - glibc-langpack-de

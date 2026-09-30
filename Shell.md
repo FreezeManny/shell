@@ -23,6 +23,16 @@ After a fresh setup, start tmux and press `<prefix> + I` (Ctrl+Space, then Shift
 
 - Script: [ansible-setup-shell.yml](./ansible-setup-shell.yml)
 
+## Roles Structure
+
+The configuration is organized into dedicated Ansible roles under `roles/`:
+- **`common`**: OS compatibility check, locale generation, and base packages (`zsh`, `tmux`, `fzf`, `bat`, `neovim`, etc.).
+- **`fonts`**: Meslo Nerd Fonts installation and font cache refresh.
+- **`zsh`**: Zap plugin manager installation, `.zshrc` configuration template, and `.p10k.zsh` theme.
+- **`tmux`**: Tmux Plugin Manager (`tpm`) installation and `.tmux.conf` configuration.
+
+Global configuration defaults reside in `group_vars/all.yml`.
+
 ## Installation
 
 - Python: `python3 -m pip install --user ansible`
@@ -31,3 +41,4 @@ After a fresh setup, start tmux and press `<prefix> + I` (Ctrl+Space, then Shift
 
 - local System: `sudo -E ansible-playbook -i localhost, -c local ansible-setup-shell.yml`
 - single Server: `ansible-playbook -i <ip_or_hostname>, -u <user> --ask-become-pass ansible-setup-shell.yml`
+

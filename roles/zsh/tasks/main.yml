@@ -1,0 +1,31 @@
+---
+- name: Check if Zap is installed
+  ansible.builtin.stat:
+    path: "{{ user_home }}/.local/share/zap"
+  register: zap_installed
+
+- name: Install Zap plugin manager
+  ansible.builtin.shell: >
+    zsh -c "$(curl -s {{ zap_install_url }})
+    --branch {{ zap_branch }} --keep-zshrc"
+  when: not zap_installed.stat.exists
+  changed_when: true
+  become_user: "{{ target_user }}"
+  environment:
+    HOME: "{{ user_home }}"
+
+- name: Copy .zshrc configuration
+  ansible.builtin.template:
+    src: zshrc.j2
+    dest: "{{ user_home }}/.zshrc"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'
+
+- name: Copy .p10k.zsh configuration
+  ansible.builtin.copy:
+    src: p10k.zsh
+    dest: "{{ user_home }}/.p10k.zsh"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'

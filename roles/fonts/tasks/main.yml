@@ -1,0 +1,39 @@
+---
+- name: Create fonts directory
+  ansible.builtin.file:
+    path: "{{ fonts_dest_dir }}"
+    state: directory
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0755'
+
+# No delegate_to here: synchronize already runs rsync on the controller and
+# pushes to the inventory host. Delegating to localhost would make localhost
+# the destination too, so remote hosts would never receive the fonts.
+- name: Copy font files
+  ansible.posix.synchronize:
+    src: "{{ fonts_src_dir }}"
+    dest: "{{ fonts_dest_dir }}/"
+    times: true
+    delete: false
+    recursive: true
+    archive: false
+    checksum: true
+  become: false
+  register: fonts_copied
+
+- name: Ensure fonts are owned by the target user
+  ansible.builtin.file:
+    path: "{{ fonts_dest_dir }}"
+    state: directory
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    recurse: true
+  when: fonts_copied.changed
+
+- name: Update font cache
+  ansible.builtin.shell: fc-cache -fv
+  become_user: "{{ target_user }}"
+  environment:
+    HOME: "{{ user_home }}"
+  when: fonts_copied.changed

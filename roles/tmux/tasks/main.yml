@@ -1,0 +1,30 @@
+---
+- name: Create tmux plugins directory
+  ansible.builtin.file:
+    path: "{{ user_home }}/.tmux/plugins"
+    state: directory
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0755'
+
+- name: Check if tmux plugin manager is installed
+  ansible.builtin.stat:
+    path: "{{ user_home }}/.tmux/plugins/tpm"
+  register: tpm_installed
+
+- name: Clone tmux plugin manager
+  ansible.builtin.git:
+    repo: "{{ tpm_repo }}"
+    dest: "{{ user_home }}/.tmux/plugins/tpm"
+    version: "{{ tpm_version }}"
+    accept_hostkey: true
+  become_user: "{{ target_user }}"
+  when: not tpm_installed.stat.exists
+
+- name: Copy tmux configuration
+  ansible.builtin.copy:
+    src: tmux.conf
+    dest: "{{ user_home }}/.tmux.conf"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    mode: '0644'

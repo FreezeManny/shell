@@ -1,0 +1,20 @@
+---
+- name: Check if OS family is supported
+  ansible.builtin.fail:
+    msg: "This playbook only supports Debian and RedHat OS families. Detected: {{ ansible_facts['os_family'] }}"
+  when: ansible_facts['os_family'] not in supported_os_families
+
+- name: Generates Ubuntu locales (en_US.UTF-8 and de_DE.UTF-8)
+  ansible.builtin.shell: locale-gen en_US.UTF-8 de_DE.UTF-8
+  when: ansible_facts['os_family'] == "Debian"
+  changed_when: true
+
+- name: Install common packages
+  ansible.builtin.package:
+    name: "{{ packages.common }}"
+    state: present
+
+- name: Install OS-specific packages
+  ansible.builtin.package:
+    name: "{{ packages[ansible_facts['os_family']] }}"
+    state: present

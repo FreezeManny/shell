@@ -1,0 +1,6 @@
+---
+target_user: "{{ ansible_user | default(lookup('env', 'SUDO_USER'), true) | default(lookup('env', 'USER'), true) }}"
+user_home: "/home/{{ target_user }}"
+
+tpm_repo: "https://github.com/tmux-plugins/tpm"
+tpm_version: "master"
