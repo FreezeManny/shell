@@ -4,10 +4,19 @@
     msg: "This playbook only supports Debian and RedHat OS families. Detected: {{ ansible_facts['os_family'] }}"
   when: ansible_facts['os_family'] not in supported_os_families
 
-- name: Generates Ubuntu locales (en_US.UTF-8 and de_DE.UTF-8)
-  ansible.builtin.shell: locale-gen en_US.UTF-8 de_DE.UTF-8
+- name: Update apt cache on Debian/Ubuntu
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
   when: ansible_facts['os_family'] == "Debian"
-  changed_when: true
+
+- name: Install EPEL repository on Enterprise Linux (RHEL, Rocky, AlmaLinux, CentOS)
+  ansible.builtin.package:
+    name: "{{ epel_rpm_url }}"
+    state: present
+  when:
+    - ansible_facts['os_family'] == "RedHat"
+    - ansible_facts['distribution'] != "Fedora"
 
 - name: Install common packages
   ansible.builtin.package:
@@ -18,3 +27,34 @@
   ansible.builtin.package:
     name: "{{ packages[ansible_facts['os_family']] }}"
     state: present
+
+- name: Ensure locales are enabled in /etc/locale.gen on Debian/Ubuntu
+  ansible.builtin.lineinfile:
+    path: /etc/locale.gen
+    regexp: "^#?\\s*{{ item }}"
+    line: "{{ item }}"
+    state: present
+  loop:
+    - "en_US.UTF-8 UTF-8"
+    - "de_DE.UTF-8 UTF-8"
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Generates locales on Debian/Ubuntu
+  ansible.builtin.shell: locale-gen en_US.UTF-8 de_DE.UTF-8
+  when: ansible_facts['os_family'] == "Debian"
+  changed_when: true
+
+- name: Check if batcat binary exists on Debian/Ubuntu
+  ansible.builtin.stat:
+    path: /usr/bin/batcat
+  register: batcat_bin
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Symlink batcat to bat on Debian/Ubuntu
+  ansible.builtin.file:
+    src: /usr/bin/batcat
+    dest: /usr/local/bin/bat
+    state: link
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - batcat_bin.stat.exists

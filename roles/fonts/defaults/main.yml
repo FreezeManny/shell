@@ -1,6 +1,6 @@
 ---
 target_user: "{{ ansible_user | default(lookup('env', 'SUDO_USER'), true) | default(lookup('env', 'USER'), true) }}"
-user_home: "/home/{{ target_user }}"
+user_home: "{{ '/root' if target_user == 'root' else '/home/' ~ target_user }}"
 
 fonts_src_dir: "{{ role_path }}/files/menslo-nerdfonts/"
 fonts_dest_dir: "{{ user_home }}/.local/share/fonts/menslo-nerdfonts"

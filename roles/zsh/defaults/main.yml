@@ -1,6 +1,6 @@
 ---
 target_user: "{{ ansible_user | default(lookup('env', 'SUDO_USER'), true) | default(lookup('env', 'USER'), true) }}"
-user_home: "/home/{{ target_user }}"
+user_home: "{{ '/root' if target_user == 'root' else '/home/' ~ target_user }}"
 
 zap_install_url: "https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh"
 zap_branch: "release-v1"

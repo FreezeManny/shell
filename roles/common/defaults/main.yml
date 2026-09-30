@@ -1,10 +1,12 @@
 ---
 target_user: "{{ ansible_user | default(lookup('env', 'SUDO_USER'), true) | default(lookup('env', 'USER'), true) }}"
-user_home: "/home/{{ target_user }}"
+user_home: "{{ '/root' if target_user == 'root' else '/home/' ~ target_user }}"
 
 supported_os_families:
   - Debian
   - RedHat
+
+epel_rpm_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_facts['distribution_major_version'] }}.noarch.rpm"
 
 packages:
   common:
